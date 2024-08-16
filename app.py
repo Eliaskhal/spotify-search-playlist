@@ -64,3 +64,19 @@ def get_liked_songs(sp, limit=50):
     except Exception as e:
         app.logger.error(f"Error getting liked songs: {str(e)}")
         raise
+    
+def get_playlist_tracks(sp, playlist_id):
+    try:
+        tracks = []
+        results = sp.playlist_tracks(playlist_id)
+        for item in results['items']:
+            track = item['track']
+            if track:
+                tracks.append(track['id'])
+        return tracks
+    except SpotifyException as se:
+        app.logger.error(f"Spotify API error in get_playlist_tracks: {str(se)}")
+        raise
+    except Exception as e:
+        app.logger.error(f"Error getting tracks from playlist {playlist_id}: {str(e)}")
+        raise
