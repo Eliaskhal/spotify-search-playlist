@@ -1,5 +1,10 @@
+from flask import Flask, request, jsonify
 from spotipy.oauth2 import SpotifyOAuth
 import spotipy
+from spotipy.exceptions import SpotifyException
+from requests.exceptions import HTTPError
+
+app = Flask(__name__)
 
 # App's credentials
 client_id = '7006daa4e47f43cda68705c1df95bf1a'
@@ -20,3 +25,15 @@ def create_spotify_client():
                                                        scope=scope))
     except Exception as e:
         print(e)
+        
+@app.route('/connect', methods=['GET'])
+def connect_spotify():
+    try:
+        create_spotify_client()
+        if sp is not None:
+            return jsonify({"message": "Spotify client connected."}), 200
+        else:
+            return jsonify({"error": "Failed to connect to Spotify."}), 500
+    except Exception as e:
+        app.logger.error(f"Error in /connect endpoint: {str(e)}")
+        return jsonify({"error": "An unexpected error occurred while connecting to Spotify."}), 500
