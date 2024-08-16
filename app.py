@@ -37,3 +37,14 @@ def connect_spotify():
     except Exception as e:
         app.logger.error(f"Error in /connect endpoint: {str(e)}")
         return jsonify({"error": "An unexpected error occurred while connecting to Spotify."}), 500
+    
+
+@app.route('/disconnect', methods=['GET'])
+def disconnect_spotify():
+    try:
+        global sp
+        sp = None
+        return jsonify({"message": "Spotify client disconnected."}), 200
+    except Exception as e:
+        app.logger.error(f"Error in /disconnect endpoint: {str(e)}")
+        return jsonify({"error": "An unexpected error occurred while disconnecting from Spotify."}), 500
