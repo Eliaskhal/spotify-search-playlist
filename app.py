@@ -49,6 +49,39 @@ def disconnect_spotify():
         app.logger.error(f"Error in /disconnect endpoint: {str(e)}")
         return jsonify({"error": "An unexpected error occurred while disconnecting from Spotify."}), 500
     
+@app.route('/search_playlists', methods=['GET'])
+def search_playlists():
+    if not sp:
+        return jsonify({"error": "Spotify client is not connected."}), 400
+    
+    query = request.args.get('query', default='', type=str)
+    if not query:
+        return jsonify({"error": "Query parameter is required."}), 400
+
+    try:
+        liked_songs = get_liked_songs(sp)
+        playlists = sp.search(q=query, type='playlist', limit=10)['playlists']['items']
+        ranked_playlists = rank_playlists_by_liked_songs(sp, playlists, liked_songs)
+        
+        # Construct the response with additional playlist details
+        playlist_data = [{
+            "name": playlist['name'],
+            "score": score,
+            "link": playlist['external_urls']['spotify'],
+            "thumbnail": playlist['images'][0]['url'] if playlist['images'] else None
+        } for playlist, score in ranked_playlists]
+
+        return jsonify({"playlists": playlist_data}), 200
+
+    except SpotifyException as se:
+        app.logger.error(f"Spotify API error: {str(se)}")
+        return jsonify({"error": "Spotify API error occurred."}), 500
+    except HTTPError as he:
+        app.logger.error(f"HTTP error: {str(he)}")
+        return jsonify({"error": "Network error occurred while fetching playlists."}), 500
+    except Exception as e:
+        app.logger.error(f"Unexpected error in /search_playlists endpoint: {str(e)}")
+        return jsonify({"error": "An unexpected error occurred."}), 500
 
 def get_liked_songs(sp, limit=50):
     try:
@@ -95,3 +128,6 @@ def rank_playlists_by_liked_songs(sp, playlists, liked_songs):
     except Exception as e:
         app.logger.error(f"Error ranking playlists: {str(e)}")
         raise
+    
+if __name__ == '__main__':
+    app.run(debug=True)
