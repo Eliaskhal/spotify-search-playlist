@@ -80,3 +80,18 @@ def get_playlist_tracks(sp, playlist_id):
     except Exception as e:
         app.logger.error(f"Error getting tracks from playlist {playlist_id}: {str(e)}")
         raise
+    
+def rank_playlists_by_liked_songs(sp, playlists, liked_songs):
+    try:
+        playlist_scores = []
+        for playlist in playlists:
+            playlist_id = playlist['id']
+            playlist_tracks = get_playlist_tracks(sp, playlist_id)
+            common_tracks = set(liked_songs).intersection(playlist_tracks)
+            score = len(common_tracks)
+            playlist_scores.append((playlist, score))
+        playlist_scores.sort(key=lambda x: x[1], reverse=True)
+        return playlist_scores
+    except Exception as e:
+        app.logger.error(f"Error ranking playlists: {str(e)}")
+        raise
