@@ -48,3 +48,19 @@ def disconnect_spotify():
     except Exception as e:
         app.logger.error(f"Error in /disconnect endpoint: {str(e)}")
         return jsonify({"error": "An unexpected error occurred while disconnecting from Spotify."}), 500
+    
+
+def get_liked_songs(sp, limit=50):
+    try:
+        liked_songs = []
+        results = sp.current_user_saved_tracks(limit=limit)
+        for item in results['items']:
+            track = item['track']
+            liked_songs.append(track['id'])
+        return liked_songs
+    except SpotifyException as se:
+        app.logger.error(f"Spotify API error in get_liked_songs: {str(se)}")
+        raise
+    except Exception as e:
+        app.logger.error(f"Error getting liked songs: {str(e)}")
+        raise
