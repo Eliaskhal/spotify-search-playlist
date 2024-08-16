@@ -3,8 +3,10 @@ from spotipy.oauth2 import SpotifyOAuth
 import spotipy
 from spotipy.exceptions import SpotifyException
 from requests.exceptions import HTTPError
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 # App's credentials
 client_id = '7006daa4e47f43cda68705c1df95bf1a'
